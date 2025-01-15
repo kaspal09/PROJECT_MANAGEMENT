@@ -100,8 +100,6 @@ mongoose
         console.error("Connection error:", error);
     });
 
-//socket io
-
 
 
 server.listen(port, () => {
