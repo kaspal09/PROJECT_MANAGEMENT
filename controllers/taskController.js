@@ -1,5 +1,6 @@
 const Task = require('../models/taskSchema');
 const Project = require('../models/projectSchema');
+const { sendMessage } = require("../utils/socket")
 
 // Create a new task within a project
 exports.createTask = async (req, res) => {
@@ -21,6 +22,10 @@ exports.createTask = async (req, res) => {
         });
 
         await task.save();
+        sendMessage("taskAdded", {
+            message: `Task "${task._id}" has been created.`,
+        });
+
         res.status(201).json(task);
     } catch (error) {
         console.error('Error creating task:', error);
@@ -52,6 +57,8 @@ exports.getTasks = async (req, res) => {
             .limit(parseInt(limit));
 
         const total = await Task.countDocuments(query);
+        //to notify about the task retrivtion
+        //sendMessage(`Task wth id ${tasks._id} has been created`)
 
         res.status(200).json({
             data: tasks,
@@ -88,7 +95,12 @@ exports.updateTask = async (req, res) => {
         task.description = description || task.description;
 
         await task.save();
+        //to notify about the updates
+        sendMessage("taskupdate", {
+            message: `Task wth id ${task._id} has been updated`
+        });
         res.status(200).json(task);
+
     } catch (error) {
         console.error('Error updating task:', error);
         res.status(500).json({ error: 'Error updating task' });
@@ -112,6 +124,10 @@ exports.deleteTask = async (req, res) => {
         }
 
         await task.deleteOne();
+        //to notify about the deletion
+        sendMessage("taskDelected", {
+            message: `Task "${task._id}" has been deleted.`,
+        });
         res.status(204).send();
     } catch (error) {
         console.error('Error deleting task:', error);

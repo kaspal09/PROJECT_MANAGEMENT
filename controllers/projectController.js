@@ -1,5 +1,5 @@
 const Project = require('../models/projectSchema');
-
+const { sendMessage } = require("../utils/socket")
 // Create a new project
 exports.createProject = async (req, res) => {
     try {
@@ -12,6 +12,12 @@ exports.createProject = async (req, res) => {
         });
 
         await project.save();
+        // Emit an event to notify clients about the new project
+        sendMessage("ProjectCreated", {
+            message: `Project "${project.name}" has been created.`,
+            project,
+        });
+
         res.status(201).json(project);
     } catch (error) {
         res.status(500).json({ error: 'Error creating project' });
@@ -66,6 +72,11 @@ exports.updateProject = async (req, res) => {
         project.description = description || project.description;
 
         await project.save();
+        // Emit an event to notify clients about the new project
+        sendMessage("projectupdated", {
+            message: `Project "${project.name}" has been updated.`
+        });
+
         res.status(200).json(project);
     } catch (error) {
         res.status(500).json({ error: 'Error updating project' });
@@ -89,6 +100,12 @@ exports.deleteProject = async (req, res) => {
         }
 
         await project.deleteOne();
+        // Emit an event to notify clients about the new project
+        sendMessage("projectdeleted", {
+            message: `Project "${project.name}" has been deleted.`,
+            project,
+        });
+
         res.status(204).send();
     } catch (error) {
         res.status(500).json({ error: 'Error deleting project' });
